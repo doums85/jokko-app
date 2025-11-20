@@ -1,0 +1,51 @@
+// ┌─────────────────────────────────────────────────────────┐
+// │               Organization Schema                       │
+// │                                                         │
+// │  Models for multi-tenancy and organization management   │
+// │  Uses PostgreSQL schema: "organization"                 │
+// └─────────────────────────────────────────────────────────┘
+
+// Enum for member roles
+enum MemberRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+
+  @@schema("organization")
+}
+
+// Organization model for multi-tenancy
+model Organization {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  logo        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  memberships Membership[]
+
+  @@map("organizations")
+  @@schema("organization")
+}
+
+// Membership model (junction table for User <-> Organization with roles)
+model Membership {
+  id             String       @id @default(cuid())
+  role           MemberRole   @default(MEMBER)
+  userId         String
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@map("memberships")
+  @@schema("organization")
+}

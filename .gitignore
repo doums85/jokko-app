@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/tests/coverage
+/tests/results
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -42,3 +46,5 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+/lib/generated/prisma
