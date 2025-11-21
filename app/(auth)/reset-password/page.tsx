@@ -3,37 +3,34 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
   useEffect(() => {
     if (!token) {
-      setError("Token manquant");
+      toast.error("Lien de réinitialisation invalide");
     }
   }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-    setMessage("");
 
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
+      toast.error("Les mots de passe ne correspondent pas");
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
+      toast.error("Le mot de passe doit contenir au moins 8 caractères");
       setIsLoading(false);
       return;
     }
@@ -48,16 +45,16 @@ function ResetPasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Une erreur s'est produite");
+        toast.error(data.error || "Une erreur s'est produite");
         return;
       }
 
-      setMessage(data.message);
+      toast.success("Votre mot de passe a été réinitialisé avec succès");
       setTimeout(() => {
         router.push("/sign-in");
       }, 2000);
     } catch (err) {
-      setError("Une erreur s'est produite");
+      toast.error("Une erreur s'est produite");
     } finally {
       setIsLoading(false);
     }
@@ -65,13 +62,19 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full">
-          <div className="rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-800">Lien de réinitialisation invalide</p>
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-xl">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-destructive">Lien invalide</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Ce lien de réinitialisation est invalide ou a expiré
+            </p>
           </div>
-          <div className="mt-4 text-center">
-            <Link href="/forgot-password" className="text-sm text-gray-600 hover:text-gray-900">
+          <div className="text-center">
+            <Link
+              href="/forgot-password"
+              className="font-medium text-primary hover:underline"
+            >
               Demander un nouveau lien
             </Link>
           </div>
@@ -81,21 +84,22 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Nouveau mot de passe
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Nouveau mot de passe</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Choisissez un mot de passe sécurisé
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground"
+              >
                 Nouveau mot de passe
               </label>
               <input
@@ -106,13 +110,19 @@ function ResetPasswordForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Nouveau mot de passe"
+                className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                placeholder="••••••••"
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Minimum 8 caractères
+              </p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-foreground"
+              >
                 Confirmer le mot de passe
               </label>
               <input
@@ -123,33 +133,19 @@ function ResetPasswordForm() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Confirmer le mot de passe"
+                className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                placeholder="••••••••"
               />
             </div>
           </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          )}
-
-          {message && (
-            <div className="rounded-md bg-green-50 p-4">
-              <p className="text-sm text-green-800">{message}</p>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoading ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
+          </button>
         </form>
       </div>
     </div>
@@ -158,7 +154,11 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Chargement...</div>}>
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <p className="text-muted-foreground">Chargement...</p>
+      </div>
+    }>
       <ResetPasswordForm />
     </Suspense>
   );

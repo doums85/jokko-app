@@ -1,21 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-    setMessage("");
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
@@ -27,80 +22,69 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Une erreur s'est produite");
+        toast.error(data.error || "Une erreur s'est produite");
         return;
       }
 
-      setMessage(data.message);
+      toast.success("Un email de réinitialisation a été envoyé à votre adresse");
       setEmail("");
     } catch (err) {
-      setError("Une erreur s'est produite");
+      toast.error("Une erreur s'est produite");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Mot de passe oublié
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Mot de passe oublié</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Entrez votre adresse email pour recevoir un lien de réinitialisation
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Adresse email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-              placeholder="Adresse email"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                placeholder="vous@exemple.com"
+              />
             </div>
-          )}
-
-          {message && (
-            <div className="rounded-md bg-green-50 p-4">
-              <p className="text-sm text-green-800">{message}</p>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Envoi en cours..." : "Envoyer le lien"}
-            </button>
           </div>
 
-          <div className="text-center">
-            <Link
-              href="/sign-in"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Retour à la connexion
-            </Link>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoading ? "Envoi en cours..." : "Envoyer le lien"}
+          </button>
         </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          <Link
+            href="/sign-in"
+            className="font-medium text-primary hover:underline"
+          >
+            Retour à la connexion
+          </Link>
+        </p>
       </div>
     </div>
   );

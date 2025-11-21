@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Always return success to avoid email enumeration
     if (!user) {
       return NextResponse.json({
-        message: "Si cet email existe, un lien de réinitialisation a été envoyé",
+        message: "Un email de réinitialisation a été envoyé à votre adresse",
       });
     }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: "Si cet email existe, un lien de réinitialisation a été envoyé",
+      message: "Un email de réinitialisation a été envoyé à votre adresse",
     });
   } catch (error) {
     console.error("Error in forgot-password:", error);
