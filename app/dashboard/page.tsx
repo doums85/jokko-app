@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.push("/login");
+      router.push("/sign-in");
     }
   }, [session, isPending, router]);
 
@@ -47,7 +47,7 @@ export default function DashboardPage() {
     await authClient.signOut();
     // Small delay to ensure signOut completes before redirect
     await new Promise(resolve => setTimeout(resolve, 200));
-    window.location.href = "/login"; // Use full page reload to ensure session is cleared
+    window.location.href = "/sign-in"; // Use full page reload to ensure session is cleared
   };
 
   if (isPending || !session) {

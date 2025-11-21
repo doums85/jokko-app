@@ -8,6 +8,7 @@ import Link from "next/link";
 export default function SignUpPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [organizationName, setOrganizationName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,28 +23,37 @@ export default function SignUpPage() {
             return;
         }
 
+        if (!organizationName || organizationName.length < 2) {
+            setError("Le nom de l'organisation doit contenir au moins 2 caractères");
+            return;
+        }
+
         setLoading(true);
 
-        const result = await signUp.email(
-            {
-                name,
-                email,
-                password,
-                callbackURL: "/",
-            },
-            {
-                onRequest: () => {
-                    setLoading(true);
+        // Utiliser l'API custom qui gère la création de l'organisation
+        try {
+            const response = await fetch("/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
                 },
-                onSuccess: () => {
-                    router.push("/");
-                },
-                onError: (ctx) => {
-                    setError(ctx.error.message || "Failed to sign up");
-                    setLoading(false);
-                },
+                body: JSON.stringify({ name, email, password, organizationName }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setError(result.error || "Une erreur est survenue");
+                setLoading(false);
+                return;
             }
-        );
+
+            // Rediriger vers le dashboard après succès
+            router.push("/dashboard");
+        } catch (err: any) {
+            setError(err.message || "Une erreur est survenue");
+            setLoading(false);
+        }
     };
 
     return (
@@ -101,6 +111,25 @@ export default function SignUpPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                                 placeholder="vous@exemple.com"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="organizationName"
+                                className="block text-sm font-medium text-foreground"
+                            >
+                                Nom de l'organisation
+                            </label>
+                            <input
+                                id="organizationName"
+                                name="organizationName"
+                                type="text"
+                                required
+                                value={organizationName}
+                                onChange={(e) => setOrganizationName(e.target.value)}
+                                className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                placeholder="Acme Inc."
                             />
                         </div>
 
