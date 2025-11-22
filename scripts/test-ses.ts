@@ -12,7 +12,7 @@
  * Ou modifier directement TEST_EMAIL dans le code ci-dessous.
  */
 
-import { sendReactEmail } from "../lib/aws/ses";
+import { sendReactEmail } from "../src/lib/aws/ses";
 import { PasswordResetEmail } from "../emails/password-reset";
 
 // ============================================================================

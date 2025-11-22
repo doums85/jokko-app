@@ -11,7 +11,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["auth", "organization"]
+
+  schemas  = ["auth", "organization", "messaging"]
 }
 
 // ============================================================
@@ -32,6 +33,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   memberships   Membership[]
+  conversations Conversation[]
+  messages      Message[]
+  contacts      Contact[]
 
   @@map("users")
   @@schema("auth")
@@ -146,4 +150,62 @@ model Membership {
   @@unique([userId, organizationId])
   @@map("memberships")
   @@schema("organization")
+}
+
+// ============================================================
+// Messaging Schema
+// ============================================================
+
+model Conversation {
+  id            String    @id @default(uuid())
+  userId        String
+  contactId     String
+  subject       String?
+  lastMessageAt DateTime  @default(now())
+  unreadCount   Int       @default(0)
+  status        String    @default("active") // 'active' | 'pending' | 'closed'
+  archived      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id])
+  contact   Contact   @relation(fields: [contactId], references: [id])
+  messages  Message[]
+
+  @@map("conversations")
+  @@schema("messaging")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  text           String
+  conversationId String
+  senderId       String
+  status         String   @default("sent") // 'sending' | 'sent' | 'delivered' | 'read' | 'error'
+  externalId     String?
+  timestamp      DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+  @@schema("messaging")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  avatarUrl String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id])
+  conversations Conversation[]
+
+  @@map("contacts")
+  @@schema("messaging")
 }

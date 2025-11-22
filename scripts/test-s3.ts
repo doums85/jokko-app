@@ -10,7 +10,7 @@
  *   pnpm tsx scripts/test-s3.ts
  */
 
-import { uploadToS3, getFromS3, deleteFromS3, generateS3Key } from "../lib/aws/s3";
+import { uploadToS3, getFromS3, deleteFromS3, generateS3Key } from "../src/lib/aws/s3";
 
 // ============================================================================
 // Configuration
@@ -78,7 +78,12 @@ async function testS3() {
     console.log("");
 
     const buffer = Buffer.from(TEST_FILE_CONTENT, "utf-8");
-    uploadedKey = generateS3Key(TEST_TENANT_ID, "documents", TEST_FILE_NAME);
+    uploadedKey = generateS3Key({
+      organizationId: TEST_TENANT_ID,
+      userId: "test-user",
+      fileName: TEST_FILE_NAME,
+      prefix: "documents"
+    });
 
     console.log(`   Tenant: ${TEST_TENANT_ID}`);
     console.log(`   Fichier: ${TEST_FILE_NAME}`);
@@ -93,8 +98,7 @@ async function testS3() {
     });
 
     console.log("   ✅ Upload réussi!");
-    console.log(`   URL: ${uploadResult.url}`);
-    console.log(`   ETag: ${uploadResult.etag}`);
+    console.log(`   URL: ${uploadResult}`);
     console.log("");
 
     // ========================================================================
@@ -106,12 +110,11 @@ async function testS3() {
     const downloadResult = await getFromS3(uploadedKey);
 
     console.log(`   Clé S3: ${uploadedKey}`);
-    console.log(`   Content-Type: ${downloadResult.contentType}`);
-    console.log(`   Taille: ${downloadResult.body.length} bytes`);
+    console.log(`   Taille: ${downloadResult.length} bytes`);
     console.log("");
 
     // Vérifier le contenu
-    const downloadedContent = downloadResult.body.toString("utf-8");
+    const downloadedContent = Buffer.from(downloadResult).toString("utf-8");
     if (downloadedContent === TEST_FILE_CONTENT) {
       console.log("   ✅ Contenu vérifié! Le fichier téléchargé correspond.");
       console.log(`   Contenu: "${downloadedContent}"`);

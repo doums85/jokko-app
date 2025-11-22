@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-whatsapp-green: #25d366;
+  --color-jokko-blue: #0084ff;
+  --color-message-received: #e5e5ea;
+  --color-text-primary: #000000;
+  --color-text-secondary: #65676b;
+  --color-border-light: #e5e5ea;
+  --color-bg-secondary: #f5f5f5;
+  
+  --spacing-sidebar-width: 280px;
+  --spacing-conversation-list-width: 320px;
+  --spacing-info-panel-width: 360px;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-text-primary font-sans antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-light hover:bg-gray-400 rounded-full;
+  }
+}
+
+@layer components {
+  .message-bubble-sent {
+    @apply bg-jokko-blue text-white rounded-2xl rounded-br-none px-3 py-2;
+  }
+
+  .message-bubble-received {
+    @apply bg-message-received text-text-primary rounded-2xl rounded-bl-none px-3 py-2;
+  }
+
+  .conversation-item-active {
+    @apply bg-white border-l-4 border-jokko-blue;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
